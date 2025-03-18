@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corrida de Cavalos</title>
+    <style>
+        body {
+            text-align: center;
+            background-color: #4CAF50;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            background-color: white;
+            display: block;
+            margin: auto;
+            border: 2px solid black;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #legenda {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .cavalo-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .cavalo-item img {
+            width: 50px; /* Ajuste o tamanho da imagem conforme necessário */
+            height: auto;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>JOÃO BET</h1>
+    <h2>é a bet da galera</h2>
+    <canvas id="pista" width="800" height="400"></canvas>
+    <br>
+    <button onclick="reiniciarCorrida()">Reiniciar Corrida</button>
+    
+    <div id="legenda">
+        <div class="cavalo-item">
+            <img src="cavalo1.png" alt="Relâmpago">
+            <span>Relâmpago</span>
+        </div>
+        <div class="cavalo-item">
+            <img src="cavalo2.png" alt="Trovão">
+            <span>Trovão</span>
+        </div>
+        <div class="cavalo-item">
+            <img src="cavalo3.png" alt="Ventania">
+            <span>Ventania</span>
+        </div>
+        <div class="cavalo-item">
+            <img src="cavalo4.png" alt="Furacão">
+            <span>Furacão</span>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("pista");
+        const ctx = canvas.getContext("2d");
+        
+        class Cavalo {
+            constructor(nome, imagemSrc, y) {
+                this.nome = nome;
+                this.x = 50;
+                this.y = y;
+                this.velocidade = Math.random() * 3 + 2;
+                this.imagem = new Image();
+                this.imagem.src = imagemSrc;
+                this.parado = false; // Adiciona uma propriedade para verificar se o cavalo está parado
+            }
+            correr() {
+                if (!this.parado) {
+                    this.x += Math.random() * this.velocidade;
+                }
+            }
+            desenhar() {
+                ctx.drawImage(this.imagem, this.x, this.y, 80, 50);
+            }
+            parar() {
+                this.parado = true; // Método para parar o cavalo
+            }
+        }
+
+        let cavalos;
+        let corrida;
+        let posicoes = [];
+
+        function iniciarCorrida() {
+            cavalos = [
+                new Cavalo("Relâmpago", "cavalo1.png", 50),
+                new Cavalo("Trovão", "cavalo2.png", 130),
+                new Cavalo("Ventania", "cavalo3.png", 210),
+                new Cavalo("Furacão", "cavalo4.png", 290)
+            ];
+            corrida = true;
+            posicoes = [];
+            atualizarCorrida();
+        }
+        
+        function desenharRaias() {
+            ctx.fillStyle = "#ccc";
+            for (let i = 0; i < cavalos.length; i++) {
+                ctx.fillRect(0, cavalos[i].y - 10, canvas.width, 20);
+            }
+        }
+
+        function atualizarCorrida() {
+            if (!corrida) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            desenharRaias();
+            
+            // Desenhar linha de chegada
+            ctx.fillStyle = "red";
+            ctx.fillRect(canvas.width - 100, 0, 10, canvas.height);
+            
+            for (let cavalo of cavalos) {
+                cavalo.correr();
+                cavalo.desenhar();
+                if (cavalo.x >= canvas.width - 100 && corrida) {
+                    // Adiciona o cavalo à lista de posições se ainda não estiver
+                    if (!posicoes.includes(cavalo.nome)) {
+                        posicoes.push(cavalo.nome);
+                        cavalo.parar(); // Para o cavalo que cruzou a linha
+                    }
+                    // Verifica se todos os cavalos cruzaram a linha de chegada
+                    if (posicoes.length === cavalos.length) {
+                        corrida = false;
+                        exibirResultados();
+                    }
+                }
+            }
+            
+            requestAnimationFrame(atualizarCorrida);
+        }
+
+        function exibirResultados() {
+            let resultado = "Resultados da Corrida:\n";
+            posicoes.forEach((cavalo, index) => {
+                resultado += `${index + 1}º lugar: ${cavalo}\n`;
+            });
+            alert(resultado);
+        }
+        
+        function reiniciarCorrida() {
+            iniciarCorrida();
+        }
+        
+        window.onload = () => {
+            iniciarCorrida();
+        };
+    </script>
+</body>
+</html>
